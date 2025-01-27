@@ -4,7 +4,8 @@
     "build": "next build",
     "dev": "next dev --turbopack",
     "start": "next start",
-    "docker": "docker-compose up -d"
+    "docker": "docker-compose up -d",
+    "lint": "next lint"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -29,6 +30,8 @@
     "@types/node": "22.10.1",
     "@types/pg": "^8.11.10",
     "@types/react": "19.0.0",
-    "@types/react-dom": "19.0.0"
+    "@types/react-dom": "19.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.6"
   }
 }

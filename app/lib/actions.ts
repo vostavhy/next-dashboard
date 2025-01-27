@@ -26,13 +26,18 @@ export async function createInvoice(formData: FormData) {
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
-  await client.query(
-    `
+  try {
+    await client.query(
+      `
     INSERT INTO invoices (customer_id, amount, status, date)
     VALUES ($1, $2, $3, $4)
   `,
-    [customerId, amountInCents, status, date]
-  );
+      [customerId, amountInCents, status, date]
+    );
+  } catch (error) {
+    console.log('Error creating invoice:');
+    console.log(error);
+  }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
