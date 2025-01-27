@@ -1,12 +1,22 @@
+'use client';
+
 import { CustomerField } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { CheckIcon, ClockIcon, CurrencyDollarIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { createInvoice } from '@/app/lib/actions';
+import { createInvoice, State } from '@/app/lib/actions';
+import { useActionState } from 'react';
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
+  const initialState: State = {
+    message: null,
+    errors: {},
+  };
+
+  const [state, formAction] = useActionState(createInvoice, initialState);
+
   return (
-    <form action={createInvoice}>
+    <form action={formAction}>
       <div className='rounded-md bg-gray-50 p-4 md:p-6'>
         {/* Customer Name */}
         <div className='mb-4'>
@@ -18,7 +28,8 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               id='customer'
               name='customerId'
               className='peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500'
-              defaultValue=''>
+              defaultValue=''
+              aria-describedby='customer-error'>
               <option value='' disabled>
                 Select a customer
               </option>
@@ -29,6 +40,14 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               ))}
             </select>
             <UserCircleIcon className='pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500' />
+          </div>
+          <div id='customer-error'>
+            {state.errors?.customerId &&
+              state.errors.customerId.map((error) => (
+                <p key={error} className='text-xs text-red-600'>
+                  {error}
+                </p>
+              ))}
           </div>
         </div>
 
@@ -46,8 +65,18 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 step='0.01'
                 placeholder='Enter USD amount'
                 className='peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500'
+                defaultValue='0'
+                aria-describedby='amount-error'
               />
               <CurrencyDollarIcon className='pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900' />
+            </div>
+            <div id='amount-error'>
+              {state.errors?.amount &&
+                state.errors.amount.map((error) => (
+                  <p key={error} className='text-xs text-red-600'>
+                    {error}
+                  </p>
+                ))}
             </div>
           </div>
         </div>
@@ -56,7 +85,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         <fieldset>
           <legend className='mb-2 block text-sm font-medium'>Set the invoice status</legend>
           <div className='rounded-md border border-gray-200 bg-white px-[14px] py-3'>
-            <div className='flex gap-4'>
+            <div className='flex gap-4' aria-describedby='status-error'>
               <div className='flex items-center'>
                 <input
                   id='pending'
@@ -86,6 +115,14 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 </label>
               </div>
             </div>
+          </div>
+          <div id='status-error'>
+            {state.errors?.status &&
+              state.errors.status.map((error) => (
+                <p key={error} className='text-xs text-red-600'>
+                  {error}
+                </p>
+              ))}
           </div>
         </fieldset>
       </div>
