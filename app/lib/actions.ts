@@ -66,13 +66,23 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
+export async function updateInvoice(id: string, prevState: State, formData: FormData) {
   // Update invoice
-  const { customerId, amount, status } = UpdateInvoice.parse({
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+
+  const { status, customerId, amount } = validatedFields.data;
 
   const amountInCents = amount * 100;
 
@@ -85,7 +95,10 @@ export async function updateInvoice(id: string, formData: FormData) {
   `,
       [customerId, amountInCents, status, id]
     );
-  } catch (error) {}
+  } catch (error) {
+    console.log('Error updating invoice:');
+    console.log(error);
+  }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
@@ -93,13 +106,18 @@ export async function updateInvoice(id: string, formData: FormData) {
 
 export async function deleteInvoice(id: string) {
   // delete invoice
-  await client.query(
-    `
+  try {
+    await client.query(
+      `
     DELETE FROM invoices
     WHERE id = $1
   `,
-    [id]
-  );
+      [id]
+    );
+  } catch (error) {
+    console.log('Error deleting invoice:');
+    console.log(error);
+  }
 
   revalidatePath('/dashboard/invoices');
 }
